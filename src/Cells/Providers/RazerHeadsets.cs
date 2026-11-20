@@ -174,7 +174,7 @@ sealed class RazerHeadsets : IProvider
         byte seq = 0;
         byte[]? Ask(byte frameGroup, byte[] body, Func<byte[], bool> match, int timeout)
         {
-            seq = (byte)(seq % 127 + 1);
+            seq = NextSequence();
             byte[] payload = [0x50, 0x41, frameGroup, seq, .. body];
             if (!link.Send(dev, payload)) return null;
             return Frame(dev.ReadUntil(timeout, r =>
@@ -188,7 +188,8 @@ sealed class RazerHeadsets : IProvider
         try
         {
             var remote = Ask(0x0E, [0x02, 0xE1, 0x01], f => f.Length > 12 && f[10] == 0x0E && f[11] == (0x80 | seq), 900);
-            var battery = Ask(0x08, [0x03, 0x21, 0x00, 0x00], f => f.Length > 13 && f[2] == 0x08 && f[10] == 0x21 && f[11] == 0x01, 1000);
+            Func<byte[], bool> isBattery = f => f.Length > 13 && f[2] == 0x08 && f[10] == 0x21 && f[11] == 0x01;
+            var battery = Ask(0x08, [0x03, 0x21, 0x00, 0x00], isBattery, 1000) ?? Ask(0x08, [0x03, 0x21, 0x00, 0x00], isBattery, 1000);
             var cable = battery == null ? null : Ask(0x08, [0x03, 0x2A, 0x00, 0x00], f => f.Length > 13 && f[2] == 0x08 && f[10] == 0x2A && f[11] == 0x01, 800);
             ctx.Note($"  {h} remote={PollContext.Hex(remote, 16)} battery={PollContext.Hex(battery, 16)} cable={PollContext.Hex(cable, 16)}");
             bool ok = battery != null && battery[13] <= 100;
@@ -199,6 +200,12 @@ sealed class RazerHeadsets : IProvider
             Ask(0x0E, [0x02, 0xE1, 0x00], f => f.Length > 11 && f[10] == 0x0E, 300);
         }
     }
+
+    // The headset ignores a frame whose sequence number repeats the previous one, so numbering
+    // continues across polls and starts at a random point after a restart.
+    static int airohaSequence = Random.Shared.Next(1, 128);
+
+    static byte NextSequence() => (byte)(Interlocked.Increment(ref airohaSequence) % 127 + 1);
 
     static byte[]? Frame(byte[]? report, AirohaLink link) => report != null && link.Stream(report) is { } s ? Find(s) : null;
 
