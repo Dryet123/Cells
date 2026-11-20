@@ -83,8 +83,8 @@ public sealed class Dialog : Window
             Padding = new Thickness(14, 5, 14, 5),
             Child = new TextBlock { Text = text.ToUpperInvariant(), FontSize = 10.5, FontWeight = FontWeights.Bold, Foreground = Paint.Of(primary ? t.Body : t.Ink) },
         };
-        var button = new Button { Template = new ControlTemplate(typeof(Button)), Margin = new Thickness(8, 0, 0, 0), Cursor = Cursors.Hand, Focusable = false };
-        button.Template.VisualTree = new FrameworkElementFactory(typeof(ContentPresenter));
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = new FrameworkElementFactory(typeof(ContentPresenter)) };
+        var button = new Button { Template = template, Margin = new Thickness(8, 0, 0, 0), Cursor = Cursors.Hand, Focusable = false };
         button.Content = face;
         button.Click += (_, _) => click();
         return button;

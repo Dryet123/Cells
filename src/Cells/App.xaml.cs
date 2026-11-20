@@ -34,6 +34,17 @@ public partial class App : Application
             Log.Error(a.Exception);
             a.Handled = true;
         };
+        try { Start(e); }
+        catch (Exception ex)
+        {
+            // Without this a failed start leaves a process with no icon and no windows.
+            Log.Error(ex);
+            Shutdown();
+        }
+    }
+
+    void Start(StartupEventArgs e)
+    {
         bool Has(string arg) => e.Args.Contains(arg, StringComparer.OrdinalIgnoreCase);
 
         if (Has("--scan"))
