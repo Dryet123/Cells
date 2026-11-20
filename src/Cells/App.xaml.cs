@@ -325,8 +325,8 @@ public partial class App : Application
         menu.Items.Add(Menus.Sub("Low battery alert", new[] { 0, 10, 15, 20, 30 }
             .Select(v => Menus.Item(v == 0 ? "Off" : $"At {v}%", () => Change(() => settings.LowAlert = v), check: settings.LowAlert == v))));
         menu.Items.Add(Menus.Item("Notify when charged", () => Change(() => settings.FullAlert = !settings.FullAlert), check: settings.FullAlert));
-        menu.Items.Add(Menus.Sub("Check every", new[] { ("30 seconds", 30), ("Minute", 60), ("5 minutes", 300) }
-            .Select(s => Menus.Item(s.Item1, () => SetInterval(s.Item2), check: settings.PollSeconds == s.Item2))));
+        menu.Items.Add(Menus.Sub("Check every", new[] { 10, 30, 60, 120, 300, 600, 900, 1800 }
+            .Select(s => Menus.Item(s < 60 ? $"{s} seconds" : s == 60 ? "Minute" : $"{s / 60} minutes", () => SetInterval(s), check: settings.PollSeconds == s))));
         menu.Items.Add(Menus.Item("Refresh now", monitor.Refresh));
         menu.Items.Add(Menus.Item("Save device report", SaveReport));
         if (Installer.IsInstalledCopy && !AppPaths.IsCustom)
