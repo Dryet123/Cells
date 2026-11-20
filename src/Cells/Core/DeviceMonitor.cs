@@ -62,6 +62,14 @@ public sealed class DeviceMonitor : IDisposable
         Updated?.Invoke(Snapshot());
     }
 
+    // Two pollers talking to one receiver at once would mix up their replies.
+    readonly object busy = new();
+
+    public string WriteReport()
+    {
+        lock (busy) return Scan.WriteReport();
+    }
+
     void Loop()
     {
         Thread.Sleep(300);
@@ -76,11 +84,14 @@ public sealed class DeviceMonitor : IDisposable
     void Poll()
     {
         var ctx = new PollContext(HidBus.List());
-        foreach (var provider in providers)
+        lock (busy)
         {
-            if (stopping) return;
-            try { provider.Poll(ctx); }
-            catch (Exception ex) { Log.Error(ex); }
+            foreach (var provider in providers)
+            {
+                if (stopping) return;
+                try { provider.Poll(ctx); }
+                catch (Exception ex) { Log.Error(ex); }
+            }
         }
 
         var now = DateTime.Now;
