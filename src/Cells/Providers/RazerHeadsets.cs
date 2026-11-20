@@ -201,8 +201,7 @@ sealed class RazerHeadsets : IProvider
         }
     }
 
-    // The headset ignores a frame whose sequence number repeats the previous one, so numbering
-    // continues across polls and starts at a random point after a restart.
+    // Frame numbers keep running across polls instead of restarting at 1 for every session.
     static int airohaSequence = Random.Shared.Next(1, 128);
 
     static byte NextSequence() => (byte)(Interlocked.Increment(ref airohaSequence) % 127 + 1);
