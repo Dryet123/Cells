@@ -10,7 +10,7 @@ The desktop widget shows the same list. It sits under all windows like a desktop
 
 Right-clicking a device on the widget or the card gives per-device actions: show it on hover or not, rename it, hide it everywhere, or forget a device that is no longer around. Hidden devices come back from the Hidden devices submenu.
 
-A notification appears once when a device drops to the low battery level (20% by default, adjustable or off), and optionally when a charging device reaches 100%. Devices are checked every minute, again right after something is plugged in or the PC wakes up, and on demand with Refresh now.
+A notification appears once when a device drops to the low battery level (20% by default, adjustable or off), and optionally when a charging device reaches 100%. Devices are checked every minute by default (anything from 10 seconds to 30 minutes can be picked), again right after something is plugged in or the PC wakes up, and on demand with Refresh now.
 
 Windows 11 puts new tray icons behind the arrow. Drag the icon from there onto the taskbar to keep it visible.
 
@@ -27,6 +27,7 @@ Windows 11 puts new tray icons behind the arrow. Drag the icon from there onto t
 | Corsair | Void, HS70, HS80 and everything on Slipstream receivers | legacy headset report and the Bragi protocol | no |
 | HyperX | Cloud II / III / Alpha / Alpha 2 / Flight / Stinger Core wireless, Pulsefire Haste 2 | per model vendor reports | no |
 | Glorious and friends | Glorious, Hitscan, G-Wolves and WLMouse wireless mice | 65-byte feature report, command 83 | no |
+| MCHOSE | A7 Ultra, A7 V2 family and L7 Pro over the receiver or cable | inverted feature report 11, commands 03 and 06 | no |
 | Compx family | Cheap 2.4 GHz mice on Compx, Areson and SinoWealth chips (Redragon, Fantech, Attack Shark, VXE, Corsair Sabre and other rebrands) | 17-byte report 08, command 04 | receiver 25A7:FA7B |
 | Bluetooth | Any paired device Windows already knows the level of | device property shown in Bluetooth settings | no |
 | AirPods and Beats | While a pair is connected to the PC | Apple proximity adverts, nearest signal | no |
@@ -65,4 +66,4 @@ The `CELLS_DATA_DIR` environment variable points the app at another data folder.
 
 ## Credits
 
-The vendor protocols were worked out by other people. The byte layouts here follow the notes and sources of OpenRazer, HeadsetControl, Solaar, BatteryHub (Wireless-Device-Battery-Monitor), barracuda-x-battery, razer-battery-barracuda-x, redragon-mouse-linux and AirStatus. No code was copied from them.
+The vendor protocols were worked out by other people. The byte layouts here follow the notes and sources of OpenRazer, HeadsetControl, Solaar, BatteryHub (Wireless-Device-Battery-Monitor), barracuda-x-battery, razer-battery-barracuda-x, redragon-mouse-linux, AirStatus, Voltide and OpenMouse. No code was copied from them.

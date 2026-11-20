@@ -20,6 +20,7 @@ public sealed class DeviceMonitor : IDisposable
         new Corsair(),
         new HyperX(),
         new Glorious(),
+        new Mchose(),
         new Compx(),
         new Bluetooth(),
         new AirPods(),
