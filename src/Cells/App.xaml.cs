@@ -191,6 +191,7 @@ public partial class App : Application
     {
         if (exiting) return;
         var rows = Rows();
+        UpdateTrayIcon(rows);
         tray.Update("Cells\n" + string.Join("\n", rows.Where(r => OnHover(r.Device))
             .Select(r => $"{r.Name} {(r.Device.HasLevel ? r.Device.Level + "%" : "off")}")));
 
@@ -204,6 +205,39 @@ public partial class App : Application
         widget.ApplyTheme(Theme, settings.WidgetScale);
         widget.Locked = settings.WidgetLocked;
         widget.View.Show(rows, Theme, LowLevel, null, stamp);
+    }
+
+    string? glyphState;
+
+    // The level glyph is only redrawn when what it shows changes.
+    void UpdateTrayIcon(List<Row> rows)
+    {
+        if (!settings.TrayShowsLevel)
+        {
+            if (glyphState != null) tray.SetIcon(trayIcon.Handle, owned: false);
+            glyphState = null;
+            return;
+        }
+        var d = (settings.TrayDevice != null
+            ? rows.FirstOrDefault(r => r.Device.Key == settings.TrayDevice)
+            : rows.Where(r => r.Device.Online && r.Device.HasLevel).MinBy(r => r.Device.Level))?.Device;
+        bool live = d is { Online: true, HasLevel: true };
+        int? level = live ? d!.Level : null;
+        bool charging = live && d!.Charging, low = live && !charging && level <= LowLevel;
+        int size = TrayGlyph.IconSize;
+        var state = $"{level}|{low}|{charging}|{size}";
+        if (state == glyphState) return;
+        glyphState = state;
+        using var bitmap = TrayGlyph.Draw(size, level, low, charging);
+        tray.SetIcon(bitmap.GetHicon(), owned: true);
+    }
+
+    void ShowLevelInTray(string? key)
+    {
+        settings.TrayShowsLevel = true;
+        settings.TrayDevice = key;
+        settings.Save();
+        Render();
     }
 
     static System.Drawing.Icon LoadTrayIcon()
@@ -300,6 +334,12 @@ public partial class App : Application
             var d = row.Device;
             menu.Items.Add(Menus.Label(row.Name.ToUpperInvariant()));
             menu.Items.Add(Menus.Item("Show on hover", () => ToggleOnHover(d.Key), check: OnHover(d)));
+            bool inTray = settings.TrayShowsLevel && settings.TrayDevice == d.Key;
+            menu.Items.Add(Menus.Item("Show level in tray icon", () =>
+            {
+                if (inTray) Change(() => settings.TrayShowsLevel = false);
+                else ShowLevelInTray(d.Key);
+            }, check: inTray));
             menu.Items.Add(Menus.Item("Rename...", () => Rename(row)));
             menu.Items.Add(Menus.Item("Hide", () => Change(() => settings.Hidden.Add(d.Key))));
             if (!d.Online) menu.Items.Add(Menus.Item("Forget", () => monitor.Forget(d.Key)));
@@ -314,6 +354,15 @@ public partial class App : Application
             .Select(s => Menus.Item(s.Item1, () => Change(() => settings.Theme = s.Item2), check: settings.Theme == s.Item2))));
 
         var rows = Rows();
+        var iconItems = new List<Forms.ToolStripItem>
+        {
+            Menus.Item("App logo", () => Change(() => settings.TrayShowsLevel = false), check: !settings.TrayShowsLevel),
+            new Forms.ToolStripSeparator(),
+            Menus.Item("Lowest charge", () => ShowLevelInTray(null), check: settings.TrayShowsLevel && settings.TrayDevice == null),
+        };
+        iconItems.AddRange(rows.Select(r => Menus.Item(r.Name, () => ShowLevelInTray(r.Device.Key),
+            check: settings.TrayShowsLevel && settings.TrayDevice == r.Device.Key)));
+        menu.Items.Add(Menus.Sub("Tray icon", iconItems));
         if (rows.Count > 0)
             menu.Items.Add(Menus.Sub("Show on hover", rows.Select(r => Menus.Item(r.Name, () => ToggleOnHover(r.Device.Key), check: OnHover(r.Device)))));
 

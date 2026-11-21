@@ -49,6 +49,7 @@ public sealed class TrayIcon : IDisposable
     readonly HwndSource window;
     readonly int taskbarCreated;
     IntPtr icon;
+    bool ownsIcon;
     string tip = "Cells";
     bool added;
 
@@ -86,6 +87,21 @@ public sealed class TrayIcon : IDisposable
             var data = Data(NIF_ICON | NIF_TIP | NIF_MESSAGE);
             if (!Shell_NotifyIconW(NIM_MODIFY, ref data)) Add();
         }
+    }
+
+    // An owned handle is destroyed when it gets replaced; the app logo handle is not owned.
+    public void SetIcon(IntPtr handle, bool owned)
+    {
+        var old = icon;
+        bool oldOwned = ownsIcon;
+        icon = handle;
+        ownsIcon = owned;
+        if (added)
+        {
+            var data = Data(NIF_ICON);
+            Shell_NotifyIconW(NIM_MODIFY, ref data);
+        }
+        if (oldOwned && old != handle) Win32.DestroyIcon(old);
     }
 
     void Add()
@@ -138,6 +154,7 @@ public sealed class TrayIcon : IDisposable
     {
         var data = Data(0);
         Shell_NotifyIconW(NIM_DELETE, ref data);
+        if (ownsIcon) Win32.DestroyIcon(icon);
         window.Dispose();
     }
 }

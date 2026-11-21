@@ -4,7 +4,7 @@ Cells is a small Windows tray app that shows the battery level of every wireless
 
 ## Using it
 
-The tray icon itself stays a plain icon. Hover it and a card slides up above the taskbar with every device, its level, a tick meter and its state (charging, low, asleep, last seen). Click the icon to pin the card open; in that mode a square next to each device shows whether it is listed on hover, and clicking a row toggles it. Right-click the icon for everything else.
+By default the tray icon is the app logo. Under Tray icon in the menu it can show a level instead, either the lowest charge or one chosen device, drawn as pixel digits over a short bar: red when the device is low, a green bar while it charges, dashes while it is off. Hover the icon and a card slides up above the taskbar with every device, its level, a tick meter and its state (charging, low, asleep, last seen). Click the icon to pin the card open; in that mode a square next to each device shows whether it is listed on hover, and clicking a row toggles it. Right-click the icon for everything else.
 
 The desktop widget shows the same list. It sits under all windows like a desktop gadget, never takes focus, stays out of Alt+Tab, and when the desktop is brought forward (Show desktop, Win+D) it lifts itself above it. Drag it anywhere; the position is remembered. The menu can lock it in place, switch between three sizes and between the light and dark theme, or hide it.
 

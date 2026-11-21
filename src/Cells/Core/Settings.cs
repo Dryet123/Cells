@@ -13,6 +13,8 @@ public sealed class Settings
     public double WidgetScale { get; set; } = 1.0;
     public string Theme { get; set; } = "light";
     public List<string> CardHidden { get; set; } = [];
+    public bool TrayShowsLevel { get; set; }
+    public string? TrayDevice { get; set; }
     public List<string> Hidden { get; set; } = [];
     public Dictionary<string, string> Names { get; set; } = [];
     public int LowAlert { get; set; } = 20;
