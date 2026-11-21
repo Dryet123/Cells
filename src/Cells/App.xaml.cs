@@ -20,6 +20,7 @@ public partial class App : Application
     List<Device> devices = [];
     readonly DispatcherTimer refreshSoon = new() { Interval = TimeSpan.FromSeconds(2) };
     readonly DispatcherTimer clock = new() { Interval = TimeSpan.FromSeconds(30) };
+    readonly DispatcherTimer trimSoon = new() { Interval = TimeSpan.FromSeconds(3) };
     readonly HashSet<string> lowNotified = [], fullNotified = [];
     bool exiting;
 
@@ -78,6 +79,8 @@ public partial class App : Application
             return;
         }
 
+        // The windows are small and flat; hardware rendering would map the GPU driver (100+ MB) into the process.
+        System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
         settings = Settings.Load();
         SetupAutostart();
 
@@ -113,6 +116,15 @@ public partial class App : Application
             monitor.Refresh();
         };
         clock.Tick += (_, _) => Render();
+        trimSoon.Tick += (_, _) =>
+        {
+            trimSoon.Stop();
+            if (!card.IsVisible) Memory.Trim();
+        };
+        card.IsVisibleChanged += (_, _) =>
+        {
+            if (!card.IsVisible) TrimSoon();
+        };
         clock.Start();
 
         monitor = new DeviceMonitor { Interval = TimeSpan.FromSeconds(settings.PollSeconds) };
@@ -175,6 +187,13 @@ public partial class App : Application
         devices = list;
         Alerts();
         Render();
+        TrimSoon();
+    }
+
+    void TrimSoon()
+    {
+        trimSoon.Stop();
+        trimSoon.Start();
     }
 
     List<Row> Rows()

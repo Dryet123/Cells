@@ -13,7 +13,7 @@ if (Get-Process Cells -ErrorAction SilentlyContinue) {
     Get-Process Cells -ErrorAction SilentlyContinue | Wait-Process -Timeout 15 -ErrorAction SilentlyContinue
 }
 
-$extra = if ($SelfContained) { @('--self-contained', 'true', '-p:EnableCompressionInSingleFile=true') } else { @('--self-contained', 'false') }
+$extra = if ($SelfContained) { @('--self-contained', 'true') } else { @('--self-contained', 'false') }
 dotnet publish "$PSScriptRoot\src\Cells" -c Release -r win-x64 @extra `
     -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o $Target
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

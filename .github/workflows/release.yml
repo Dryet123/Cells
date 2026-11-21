@@ -24,7 +24,7 @@ jobs:
           $version = "${{ github.ref_name }}".TrimStart("v")
           dotnet publish src/Cells -c Release -r win-x64 --self-contained true `
             -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:EnableCompressionInSingleFile=true -p:DebugType=none -p:Version=$version -o out
+            -p:DebugType=none -p:Version=$version -o out
           New-Item -ItemType Directory dist | Out-Null
           Copy-Item out/Cells.exe dist/Cells.exe
 
